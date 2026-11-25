@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { LogOut, Plus, Store } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LogOut, Moon, Plus, Store, Sun } from "lucide-react";
 import AuthForm from "./components/AuthForm.jsx";
 import Marketplace from "./components/Marketplace.jsx";
+import NegotiationDrawer from "./components/NegotiationDrawer.jsx";
 import PostItemForm from "./components/PostItemForm.jsx";
 
 function loadUser() {
@@ -12,9 +13,22 @@ function loadUser() {
   }
 }
 
+function loadDark() {
+  const saved = localStorage.getItem("cc_theme");
+  if (saved) return saved === "dark";
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
 export default function App() {
   const [user, setUser] = useState(loadUser);
   const [view, setView] = useState("market");
+  const [dark, setDark] = useState(loadDark);
+  const [activeListing, setActiveListing] = useState(null);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("cc_theme", dark ? "dark" : "light");
+  }, [dark]);
 
   function logout() {
     localStorage.removeItem("token");
@@ -24,33 +38,46 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-chalk text-ink">
-      <header className="sticky top-0 z-20 border-b border-rule bg-white/90 backdrop-blur">
+    <div className="min-h-screen bg-chalk text-ink transition-colors duration-200 dark:bg-zinc-950 dark:text-zinc-100">
+      <header className="sticky top-0 z-20 border-b border-rule bg-white/85 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/85">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
           <button
             type="button"
-            className="flex items-center gap-2.5 text-left"
+            className="group flex items-center gap-2.5 text-left"
             onClick={() => setView("market")}
           >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-ink text-white">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-ink text-white transition-transform duration-200 group-hover:scale-105 dark:bg-zinc-100 dark:text-zinc-950">
               <Store size={16} />
             </span>
             <span>
               <span className="block font-display text-base font-bold tracking-tight">Campus Cart</span>
-              <span className="hidden text-[11px] text-slate2 sm:block">B.Tech student marketplace</span>
+              <span className="hidden text-[11px] text-slate2 dark:text-zinc-400 sm:block">
+                B.Tech student marketplace
+              </span>
             </span>
           </button>
 
-          <nav className="flex items-center gap-2.5">
+          <nav className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDark((d) => !d)}
+              className="btn-ghost px-2.5"
+              aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+              title={dark ? "Light mode" : "Dark mode"}
+            >
+              {dark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+
             {view !== "market" && (
               <button type="button" className="btn-ghost" onClick={() => setView("market")}>
                 Browse
               </button>
             )}
+
             {user ? (
               <>
-                <span className="hidden items-center gap-1.5 rounded-full border border-rule bg-chalk px-3 py-1 text-xs font-medium text-slate2 md:inline-flex">
-                  <span className="text-ink">{user.name}</span>
+                <span className="hidden items-center gap-1.5 rounded-full border border-rule bg-chalk px-3 py-1 text-xs font-medium text-slate2 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:inline-flex">
+                  <span className="text-ink dark:text-zinc-100">{user.name}</span>
                   <span>·</span>
                   <span>B.Tech {user.department}</span>
                   <span>·</span>
@@ -83,8 +110,8 @@ export default function App() {
         </div>
       </header>
 
-      <main className="pb-14">
-        {view === "market" && <Marketplace />}
+      <main className="pb-16">
+        {view === "market" && <Marketplace onOpenChat={setActiveListing} />}
         {view === "auth" && (
           <AuthForm
             onAuth={(u) => {
@@ -106,6 +133,18 @@ export default function App() {
             />
           ))}
       </main>
+
+      {activeListing && (
+        <NegotiationDrawer
+          listing={activeListing}
+          user={user}
+          onClose={() => setActiveListing(null)}
+          onRequireAuth={() => {
+            setActiveListing(null);
+            setView("auth");
+          }}
+        />
+      )}
     </div>
   );
 }

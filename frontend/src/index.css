@@ -2,9 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-body { @apply bg-chalk font-sans text-ink antialiased; }
-.label { @apply mb-1.5 block text-xs font-medium text-slate2; }
-.field { @apply w-full rounded-lg border border-rule bg-white px-3 py-2 text-sm text-ink placeholder:text-slate2/70 outline-none transition focus:border-ink focus:ring-2 focus:ring-ink/10; }
-.btn { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-ink/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-50; }
-.btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-rule bg-white px-3 py-2 text-sm font-medium text-ink transition hover:border-ink/40 hover:bg-neutral-50; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-chalk font-sans text-ink antialiased transition-colors duration-200 dark:bg-zinc-950 dark:text-zinc-100;
+  }
+}
+
+.label {
+  @apply mb-1.5 block text-xs font-medium text-slate2 dark:text-zinc-400;
+}
+.field {
+  @apply w-full rounded-lg border border-rule bg-white px-3 py-2 text-sm text-ink placeholder:text-slate2/70 outline-none transition duration-150 focus:border-ink focus:ring-2 focus:ring-ink/10 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-400 dark:focus:ring-zinc-400/20;
+}
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition duration-150 hover:bg-ink/90 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-rule bg-white px-3 py-2 text-sm font-medium text-ink transition duration-150 hover:border-ink/40 hover:bg-neutral-50 active:scale-[0.99] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-800;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

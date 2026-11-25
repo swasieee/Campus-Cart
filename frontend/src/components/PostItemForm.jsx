@@ -81,11 +81,14 @@ export default function PostItemForm({ user, onPosted }) {
   }
 
   return (
-    <div className="mx-auto mt-8 max-w-xl px-4">
-      <form onSubmit={submit} className="space-y-5 rounded-xl border border-rule bg-white p-6 shadow-sm sm:p-7">
+    <div className="animate-pop-in mx-auto mt-8 max-w-xl px-4">
+      <form
+        onSubmit={submit}
+        className="space-y-5 rounded-2xl border border-rule bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-7"
+      >
         <div>
           <h1 className="font-display text-xl font-bold tracking-tight">List an item</h1>
-          <p className="mt-1 text-sm text-slate2">
+          <p className="mt-1 text-sm text-slate2 dark:text-zinc-400">
             Tag your B.Tech branch, semester, price range, and description so classmates can find it easily.
           </p>
         </div>
@@ -191,7 +194,7 @@ export default function PostItemForm({ user, onPosted }) {
           {previews.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2.5">
               {previews.map((src, idx) => (
-                <div key={src} className="relative h-16 w-16 overflow-hidden rounded-lg border border-rule">
+                <div key={src} className="relative h-16 w-16 overflow-hidden rounded-lg border border-rule dark:border-zinc-700">
                   <img src={src} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
@@ -208,7 +211,10 @@ export default function PostItemForm({ user, onPosted }) {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+          >
             {error}
           </p>
         )}

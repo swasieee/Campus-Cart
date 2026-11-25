@@ -26,3 +26,9 @@ npm run dev
 - `POST /api/listings` (Bearer JWT): `title, description, price, listingType, category, semester, department, imageUrls[]`
 - Each listing in the response must also include `sellerName`, `sellerPhone` (digits, with country code) and `status` ("AVAILABLE" by default), needed for the WhatsApp link
 - Enable CORS for `http://localhost:5173`
+
+## 4. Deploy to Vercel + Free Supabase Storage/DB
+1. Run `npm run dev` from the repository root to start the local core API (`8080`), search engine (`8000`), and Vite frontend (`5173`).
+2. To deploy on Vercel (`https://vercel.com`), run `vercel login` then `vercel --prod` from the repository root (`vercel.json` builds `frontend/dist` and exposes serverless `/api/*` endpoints).
+3. For persistent cloud database + image storage on the free tier, create a project on [Supabase](https://supabase.com), run `supabase/schema.sql` in the SQL Editor, and set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `AUTH_SECRET` in Vercel Environment Variables.
+

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import { login, register } from "../api.js";
 import { DEPARTMENTS, EMAIL_REGEX, SEMESTERS } from "../lib/constants.js";
 
@@ -18,17 +19,11 @@ export default function AuthForm({ onAuth, notice }) {
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const emailOk = EMAIL_REGEX.test(form.email.trim());
 
-  async function submit(e) {
-    e.preventDefault();
+  async function completeAuth(authPromise) {
     setError("");
-    if (!emailOk) return setError("Please enter a valid email address (e.g. name@gmail.com).");
     setBusy(true);
     try {
-      const email = form.email.trim();
-      const data =
-        mode === "login"
-          ? await login({ email, password: form.password })
-          : await register({ ...form, email, semester: Number(form.semester) });
+      const data = await authPromise;
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
       onAuth(data.user);
@@ -39,14 +34,30 @@ export default function AuthForm({ onAuth, notice }) {
     }
   }
 
+  function submit(e) {
+    e.preventDefault();
+    if (!emailOk) {
+      return setError("Please enter a valid email address (e.g. name@gmail.com).");
+    }
+    const email = form.email.trim();
+    const action =
+      mode === "login"
+        ? login({ email, password: form.password })
+        : register({ ...form, email, semester: Number(form.semester) });
+    return completeAuth(action);
+  }
+
   return (
-    <div className="mx-auto mt-10 max-w-md px-4">
-      <form onSubmit={submit} className="space-y-4 rounded-xl border border-rule bg-white p-6 shadow-sm sm:p-7">
+    <div className="animate-pop-in mx-auto mt-10 max-w-md px-4">
+      <form
+        onSubmit={submit}
+        className="space-y-4 rounded-2xl border border-rule bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-7"
+      >
         <div>
           <h1 className="font-display text-xl font-bold tracking-tight">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="mt-1 text-sm text-slate2">
+          <p className="mt-1 text-sm text-slate2 dark:text-zinc-400">
             {notice || "Sign in with your Gmail or college email."}
           </p>
         </div>
@@ -111,7 +122,9 @@ export default function AuthForm({ onAuth, notice }) {
             required
           />
           {form.email && !emailOk && (
-            <p className="mt-1 text-xs text-red-600">Enter a valid email address (Gmail or college email).</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+              Enter a valid email address (Gmail or college email).
+            </p>
           )}
         </div>
 
@@ -130,19 +143,33 @@ export default function AuthForm({ onAuth, notice }) {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+          <p
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+          >
             {error}
           </p>
         )}
 
-        <button className="btn w-full" disabled={busy}>
+        <button className="btn w-full py-2.5" disabled={busy}>
           {busy ? "Please wait…" : mode === "login" ? "Log in" : "Create account"}
         </button>
 
-        <div className="border-t border-rule pt-3 text-center">
+        {mode === "login" && (
           <button
             type="button"
-            className="text-xs font-medium text-slate2 hover:text-ink"
+            disabled={busy}
+            onClick={() => completeAuth(login({ email: "aarav@gmail.com", password: "campus1234" }))}
+            className="btn-ghost w-full text-xs"
+          >
+            <Sparkles size={14} /> Quick Demo Login (aarav@gmail.com)
+          </button>
+        )}
+
+        <div className="border-t border-rule pt-3 text-center dark:border-zinc-800">
+          <button
+            type="button"
+            className="text-xs font-medium text-slate2 hover:text-ink dark:text-zinc-400 dark:hover:text-zinc-100"
             onClick={() => {
               setError("");
               setMode(mode === "login" ? "register" : "login");

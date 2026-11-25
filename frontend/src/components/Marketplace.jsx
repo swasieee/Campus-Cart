@@ -20,7 +20,7 @@ function matchesPriceRange(item, minPrice, maxPrice) {
   return true;
 }
 
-export default function Marketplace() {
+export default function Marketplace({ onOpenChat }) {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [query, setQuery] = useState("");
   const [listings, setListings] = useState([]);
@@ -64,7 +64,7 @@ export default function Marketplace() {
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, 250);
+    }, 200);
     return () => {
       cancelled = true;
       clearTimeout(timer);
@@ -73,26 +73,26 @@ export default function Marketplace() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+      <div className="animate-fade-up mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-ink">
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink dark:text-zinc-100">
             Campus Marketplace
           </h1>
-          <p className="mt-1 text-sm text-slate2">
+          <p className="mt-1 text-sm text-slate2 dark:text-zinc-400">
             Find textbooks, notes, calculators, and lab kits by B.Tech branch, semester, and budget.
           </p>
         </div>
         {!loading && !error && (
-          <span className="text-xs font-medium text-slate2">
+          <span className="rounded-full border border-rule bg-white px-3 py-1 text-xs font-medium text-slate2 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
             {listings.length} {listings.length === 1 ? "listing" : "listings"}
           </span>
         )}
       </div>
 
-      <div className="mb-7 rounded-xl border border-rule bg-white p-3.5 shadow-sm">
+      <div className="animate-fade-up mb-7 rounded-2xl border border-rule bg-white p-3.5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div className="grid gap-2.5 md:grid-cols-6">
           <label className="relative md:col-span-2">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate2" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate2 dark:text-zinc-500" />
             <input
               className="field pl-9"
               placeholder="Search books, notes, kits…"
@@ -146,7 +146,11 @@ export default function Marketplace() {
 
         {hasActiveFilters && (
           <div className="mt-2.5 flex justify-end">
-            <button type="button" onClick={resetAll} className="inline-flex items-center gap-1 text-xs font-medium text-slate2 hover:text-ink">
+            <button
+              type="button"
+              onClick={resetAll}
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate2 hover:text-ink dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
               <RotateCcw size={12} /> Clear filters
             </button>
           </div>
@@ -154,23 +158,28 @@ export default function Marketplace() {
       </div>
 
       {error && (
-        <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+        >
           {error}
         </div>
       )}
 
       {loading && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="h-72 animate-pulse rounded-xl border border-rule bg-white" />
+            <div key={n} className="h-72 animate-pulse rounded-2xl border border-rule bg-white dark:border-zinc-800 dark:bg-zinc-900" />
           ))}
         </div>
       )}
 
       {!loading && !error && listings.length === 0 && (
-        <div className="rounded-xl border border-dashed border-rule bg-white py-14 text-center">
-          <p className="text-sm font-medium text-ink">No items match your filters yet</p>
-          <p className="mt-1 text-xs text-slate2">Try clearing a filter or post the first listing for this branch.</p>
+        <div className="rounded-2xl border border-dashed border-rule bg-white py-14 text-center dark:border-zinc-800 dark:bg-zinc-900">
+          <p className="text-sm font-medium text-ink dark:text-zinc-100">No items match your filters yet</p>
+          <p className="mt-1 text-xs text-slate2 dark:text-zinc-400">
+            Try clearing a filter or post the first listing for this branch.
+          </p>
           {hasActiveFilters && (
             <button type="button" onClick={resetAll} className="btn-ghost mt-4">
               Reset filters
@@ -181,8 +190,8 @@ export default function Marketplace() {
 
       {!loading && listings.length > 0 && (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {listings.map((l) => (
-            <ListingCard key={l.id} listing={l} />
+          {listings.map((l, idx) => (
+            <ListingCard key={l.id} listing={l} index={idx} onOpenChat={onOpenChat} />
           ))}
         </div>
       )}
