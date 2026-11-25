@@ -1,0 +1,49 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python (engine-service)
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# C shared library & build artifacts
+engine-service/lib/*.so
+engine-service/lib/*.dll
+engine-service/lib/*.dylib
+engine-service/lib/*.lib
+engine-service/lib/*.exp
+engine-service/lib/*.pdb
+*.o
+*.obj
+*.exe
+*.out
+
+# Node / Vite / React (frontend)
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS & Editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
