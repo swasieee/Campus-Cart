@@ -1,0 +1,8 @@
+{
+  "name": "campus-exchange-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:real-core": "node scripts/dev.mjs --no-mock"
+  }
+}
