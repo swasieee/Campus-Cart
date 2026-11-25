@@ -14,6 +14,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 *.egg-info/
+engine-service/uploads/
 
 # C shared library & build artifacts
 engine-service/lib/*.so

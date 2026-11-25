@@ -10,11 +10,11 @@ const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 const users = new Map([
   [
-    "aarav@college.edu",
+    "aarav@gmail.com",
     {
       id: 1,
       name: "Aarav Sharma",
-      email: "aarav@college.edu",
+      email: "aarav@gmail.com",
       department: "CSE",
       semester: 5,
       phone: "919876543210",
@@ -22,14 +22,16 @@ const users = new Map([
   ],
 ]);
 
-const tokens = new Map([["dev-token-1", users.get("aarav@college.edu")]]);
+const tokens = new Map([["dev-token-1", users.get("aarav@gmail.com")]]);
 
 const listings = [
   {
     id: 101,
     title: "Morris Mano Digital Design (5th Edition)",
     description: "Clean pages, no highlights. Great for Digital Logic in Sem 3.",
-    price: 350,
+    price: 300,
+    priceMin: 300,
+    priceMax: 380,
     listingType: "SELL",
     category: "Books",
     semester: 3,
@@ -43,11 +45,13 @@ const listings = [
     id: 102,
     title: "Data Structures & Algorithms Handwritten Notes",
     description: "Complete semester notes covering trees, graphs, DP, and past exam solutions.",
-    price: 120,
+    price: 100,
+    priceMin: 100,
+    priceMax: 150,
     listingType: "SELL",
     category: "Notes",
     semester: 3,
-    department: "CSE",
+    department: "IT",
     imageUrls: [],
     sellerName: "Diya Nair",
     sellerPhone: "919811223344",
@@ -57,7 +61,9 @@ const listings = [
     id: 103,
     title: "Arduino Uno + Breadboard Lab Kit",
     description: "Includes jumper wires, sensors, and USB cable. Willing to swap for Casio fx-991EX.",
-    price: 0,
+    price: 450,
+    priceMin: 450,
+    priceMax: 600,
     listingType: "EXCHANGE",
     category: "Lab Equipment",
     semester: 2,
@@ -71,7 +77,9 @@ const listings = [
     id: 104,
     title: "Casio fx-991EX Scientific Calculator",
     description: "Original ClassWiz, barely used, working solar + battery.",
-    price: 750,
+    price: 700,
+    priceMin: 700,
+    priceMax: 800,
     listingType: "SELL",
     category: "Electronics",
     semester: 1,
@@ -166,10 +174,16 @@ const server = http.createServer(async (req, res) => {
       const dept = url.searchParams.get("department");
       const sem = url.searchParams.get("semester");
       const cat = url.searchParams.get("category");
+      const minPrice = url.searchParams.get("minPrice");
+      const maxPrice = url.searchParams.get("maxPrice");
       const filtered = listings.filter((item) => {
         if (dept && item.department !== dept) return false;
         if (sem && String(item.semester) !== sem) return false;
         if (cat && item.category !== cat) return false;
+        const low = Number(item.priceMin ?? item.price ?? 0);
+        const high = Number(item.priceMax ?? item.price ?? low);
+        if (minPrice && high < Number(minPrice)) return false;
+        if (maxPrice && low > Number(maxPrice)) return false;
         return true;
       });
       return sendJson(res, 200, filtered);
@@ -182,11 +196,15 @@ const server = http.createServer(async (req, res) => {
       if (!seller) return sendJson(res, 401, { message: "Please log in first." });
 
       const body = await readJson(req);
+      const minPrice = Number(body.priceMin ?? body.price ?? 0);
+      const maxPrice = Number(body.priceMax ?? minPrice);
       const item = {
         id: nextListingId++,
         title: String(body.title || "").trim(),
         description: String(body.description || "").trim(),
-        price: Number(body.price) || 0,
+        price: minPrice,
+        priceMin: minPrice,
+        priceMax: maxPrice,
         listingType: body.listingType || "SELL",
         category: body.category || "Other",
         semester: Number(body.semester) || seller.semester,

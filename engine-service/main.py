@@ -2,27 +2,42 @@
 import ctypes
 import os
 import platform
+import uuid
 from pathlib import Path
 
 import cloudinary
 import cloudinary.uploader
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
+UPLOAD_DIR = BASE_DIR / "uploads"
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+_PLACEHOLDERS = {"", "your_cloud_name", "your_api_key", "your_api_secret"}
 
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    secure=True,
-)
+
+def _cloudinary_configured() -> bool:
+    vals = (
+        os.getenv("CLOUDINARY_CLOUD_NAME", "").strip(),
+        os.getenv("CLOUDINARY_API_KEY", "").strip(),
+        os.getenv("CLOUDINARY_API_SECRET", "").strip(),
+    )
+    return all(v not in _PLACEHOLDERS for v in vals)
+
+
+if _cloudinary_configured():
+    cloudinary.config(
+        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.getenv("CLOUDINARY_API_KEY"),
+        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+        secure=True,
+    )
 
 app = FastAPI(title="Campus Exchange Engine Service")
 app.add_middleware(
@@ -116,12 +131,19 @@ def health():
 
 
 @app.post("/api/media/upload", response_model=UploadResponse)
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(request: Request, file: UploadFile = File(...)):
     data = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "Image is larger than 5 MB.")
-    if detect_image_type(data[:16]) is None:
+    ext = detect_image_type(data[:16])
+    if ext is None:
         raise HTTPException(415, "File is not a valid JPEG, PNG or WebP image.")
+    if not _cloudinary_configured():
+        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        (UPLOAD_DIR / filename).write_bytes(data)
+        base = str(request.base_url).rstrip("/")
+        return UploadResponse(secure_url=f"{base}/api/media/files/{filename}", public_id=filename)
     try:
         result = await run_in_threadpool(
             cloudinary.uploader.upload, data, folder="campus-exchange", resource_type="image"
@@ -129,6 +151,16 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as exc:  # cloudinary raises generic errors
         raise HTTPException(502, f"Cloudinary upload failed: {exc}") from exc
     return UploadResponse(secure_url=result["secure_url"], public_id=result["public_id"])
+
+
+@app.get("/api/media/files/{filename}")
+def get_uploaded_image(filename: str):
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(400, "Invalid filename.")
+    path = UPLOAD_DIR / filename
+    if not path.is_file():
+        raise HTTPException(404, "Image not found.")
+    return FileResponse(path)
 
 
 @app.post("/api/search/rank", response_model=RankResponse)

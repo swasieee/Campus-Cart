@@ -2,8 +2,17 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
-      colors: { ink: "#14213D", chalk: "#F6F8FA", mark: "#FFD23F", slate2: "#5B6B7F", rule: "#D8DEE6" },
-      fontFamily: { display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"] },
+      colors: {
+        ink: "#0F172A",
+        chalk: "#FAFAFA",
+        mark: "#0F172A",
+        slate2: "#64748B",
+        rule: "#E2E8F0",
+      },
+      fontFamily: {
+        sans: ['"Inter"', "system-ui", "sans-serif"],
+        display: ['"Plus Jakarta Sans"', '"Inter"', "system-ui", "sans-serif"],
+      },
     },
   },
   plugins: [],
